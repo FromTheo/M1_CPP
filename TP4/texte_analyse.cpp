@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <numeric> 
 #include <set>
+#include <tuple>
 
 using namespace std; 
 
@@ -43,6 +44,27 @@ bool bcp_conditions(const std::pair<string, unsigned>& p)
         return true;
     }
     return false; 
+}
+
+std::tuple<double, unsigned, std::vector<string>> basic_statistics(const std::map<string,unsigned>&M)
+{
+    double moy = std::accumulate(M.begin(), M.end(), 0.0, [](double acc, const pair<string,unsigned>& p)
+    {
+        return acc+p.first.size(); 
+    })/(double)M.size(); 
+    std::vector<string> V(10); 
+    std::map<string, unsigned> M_ = M; 
+    for(int i=0; i<10; i++)
+    {
+        auto it = std::max_element(M_.begin(), M_.end(), [](const pair<string,unsigned>& p, const pair<string,unsigned>& q)
+        {
+            return p.first.size() < q.first.size();
+        });
+        pair<string, unsigned> p = *it;
+        M_.erase(it);
+        V[i] = p.first; 
+    }
+    return std::make_tuple(moy, V.front().size(), V); 
 }
 
 set<string> filter(const map<string,unsigned>& M, char first_letter, unsigned k)
@@ -226,5 +248,14 @@ int main()
     }
     file_out3.close(); 
 
+    cout << "\n*** Question 18 ***" << endl;
+    std::tuple<double, unsigned, std::vector<string>> X = basic_statistics(S); 
+    cout << "Moyenne = " << get<0>(X) << endl; 
+    cout << "Nb lettres du mot le plus long " << get<1>(X) << endl; 
+    cout << "Les 10 mots les plus longs : " << endl; 
+    for(const string& s : get<2>(X))
+    {
+        cout << s << endl; 
+    }
     return 0; 
 }
